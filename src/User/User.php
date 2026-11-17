@@ -4,14 +4,14 @@ namespace App\User;
 
 class User
 {
-    private int $id;
+
     private string $name;
     private string $lastName;
     private string $email;
 
-    public function __construct(int $id, string $name, string $lastName, string $email='')
+    public function __construct(string $name, string $lastName, ?string $email='')
     {
-        $this->id = $id;
+
         $this->name = $name;
         $this->lastName = $lastName;
         if(empty($email)){
@@ -23,7 +23,6 @@ class User
     public function getUser():array
     {
         return [
-            'ID' => $this->id,
             'NAME' => $this->name,
             'LAST_NAME' => $this->lastName,
             'EMAIL' => $this->email,
