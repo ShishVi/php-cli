@@ -35,7 +35,11 @@ class HandlerCommand
         if($name=== null || $lastName === null){
             throw new \InvalidArgumentException('Error command!');
         }
-        $this->userRepository->saveUser(new User($name, $lastName, $email));
+        $id = $this->userRepository->getNextID();
+        if(!$id){
+            throw new \InvalidArgumentException('Error get ID');
+        }
+        $this->userRepository->saveUser(new User($id, $name, $lastName, $email));
 
     }
 

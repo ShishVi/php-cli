@@ -4,37 +4,61 @@ namespace App\UserRepository;
 
 use App\User\User;
 
-class UserRepository
+readonly class UserRepository
 {
-    public function __construct(){}
+
+    public function __construct(private readonly string $fileBD){}
 
     public function saveUser(User $user):void
     {
         try {
-            $payload = json_encode( $user->getUser(), JSON_THROW_ON_ERROR);
-            file_put_contents('data_base_user.json', $payload, FILE_APPEND);
+            $userPayload = $user->getUser();
+            $allUsers = $this->getAllUser();
+            $allUsers[] = $userPayload;
+            $payload = json_encode( $allUsers, JSON_THROW_ON_ERROR);
+            file_put_contents($this->fileBD, $payload, LOCK_EX);
             fwrite(STDOUT, "User saved successfully");
+            exit(1);
         } catch (\JsonException $e){
             echo "Error save: ". $e->getMessage();
         }
     }
 
-    public static function getKeyID(string $file_bd):id
+    public function getNextID():int
     {
-        if(file_exists($file_bd)){
-            try {
-                $fileBD = file_get_contents($file_bd);
-                $arrFile = json_decode($fileBD, true, 512, JSON_THROW_ON_ERROR);
-                var_dump($arrFile);
-                die();
-            } catch (\JsonException $e){
-                echo "Error read file: ". $e->getMessage();
-            }
-
-        }else{
-            fwrite(STDERR, "File BD not found\n");
-            exit(2);
+        $allUsers = $this->getAllUser();
+        if(empty($allUsers)){
+            return 1;
         }
+
+        $maxId = 0;
+        foreach($allUsers as $user){
+            if(isset($user['ID']) && (int)$user['ID'] > $maxId){
+                $maxId = (int)$user['ID'];
+            }
+        }
+        return $maxId +1;
     }
 
+    public function getAllUser():array
+    {
+        if(!file_exists($this->fileBD)|| filesize($this->fileBD) === 0){
+            return [];
+        }
+
+        $content = file_get_contents($this->fileBD);
+
+        if($content === false)
+        {
+            return [];
+        }
+
+        try{
+            $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            return $data ?? [];
+        }catch (\JsonException $e){
+            echo "Error read file: ". $e->getMessage();
+            return [];
+        }
+    }
 }

@@ -11,7 +11,7 @@ if(PHP_SAPI !== 'cli'){
 }
 
 try{
-    $handler = new HandlerCommand(new UserRepository\userRepository());
+    $handler = new HandlerCommand(new UserRepository\userRepository('data/data_base_user.json'));
     $handler->checkCommand($argv);
 }catch(\InvalidArgumentException $e){
     fwrite(STDERR, "Error: {$e->getMessage()}\n");
