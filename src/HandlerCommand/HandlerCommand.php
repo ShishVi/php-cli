@@ -27,6 +27,8 @@ class HandlerCommand
 
          match ($command) {
              'addUser' => $this->addUser($name, $lastName, $email),
+             'getAllUsers' => $this->getAllUsers(),
+             'deleteUser' => $this->deleteUser((int)$name),
          };
     }
 
@@ -41,6 +43,21 @@ class HandlerCommand
         }
         $this->userRepository->saveUser(new User($id, $name, $lastName, $email));
 
+    }
+
+    private function getAllUsers():void
+    {
+        $users = $this->userRepository->allUsers();
+        fwrite(STDOUT, $users);
+    }
+
+    private function deleteUser(int $id):void
+    {
+        try{
+            $this->userRepository->deleteUser($id);
+        }catch (\UnderflowException $e){
+            fwrite(STDERR, 'Errors: ' . $e->getMessage());
+        }
     }
 
 
