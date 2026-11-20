@@ -1,10 +1,10 @@
 <?php
 
-namespace App\User;
+namespace App\Domain\User;
 
 class User
 {
-    private int $id;
+    private ?int $id;
     private string $name;
     private string $lastName;
     private string $email;
@@ -38,5 +38,9 @@ class User
         return $randUserEmail .'@'. $domains[array_rand($domains)];
     }
 
+    public function withId(int $id): self
+    {
+        return new self($id, $this->name, $this->lastName, $this->email);
+    }
 
 }

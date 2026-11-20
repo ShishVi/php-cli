@@ -1,14 +1,14 @@
 <?php
 
-namespace App\HandlerCommand;
+namespace App\Application;
 
-use App\User\User;
-use App\UserRepository\UserRepository;
+use App\Domain\User\User;
+use App\Infrastructure\Persistence\Json\JsonUserRepository;
 
 class HandlerCommand
 {
 
-    public function __construct(private UserRepository $userRepository)
+    public function __construct(private JsonUserRepository $userRepository)
     {
 
     }

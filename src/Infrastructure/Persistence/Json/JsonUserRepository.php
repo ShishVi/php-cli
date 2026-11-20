@@ -1,30 +1,37 @@
 <?php
 
-namespace App\UserRepository;
+namespace App\Infrastructure\Persistence\Json;
 
-use App\User\User;
+use App\Domain\User\User;
+use App\Domain\User\UserRepositoryInterface;
 
-readonly class UserRepository
+readonly class JsonUserRepository implements UserRepositoryInterface
 {
 
     public function __construct(private readonly string $fileBD){}
 
-    public function saveUser(User $user):void
+    public function saveUser(User $user):User
     {
         try {
+            $nextID = $this->getNextID();
+
+            $user = $user->withId($nextID);
+
             $userPayload = $user->getUser();
+
             $allUsers = $this->getArrAllUser();
+
             $allUsers[] = $userPayload;
             $payload = json_encode( $allUsers, JSON_THROW_ON_ERROR);
             file_put_contents($this->fileBD, $payload, LOCK_EX);
             fwrite(STDOUT, "User saved successfully");
-            exit(1);
+            return $user;
         } catch (\JsonException $e){
             echo "Error save: ". $e->getMessage();
         }
     }
 
-    public function getNextID():int
+    private function getNextID():int
     {
         $allUsers = $this-> getArrAllUser();
         if(empty($allUsers)){
@@ -40,7 +47,7 @@ readonly class UserRepository
         return $maxId +1;
     }
 
-    public function getArrAllUser():array
+    private function getArrAllUser():array
     {
         if(!file_exists($this->fileBD)|| filesize($this->fileBD) === 0){
             return [];
