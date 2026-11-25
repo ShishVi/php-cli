@@ -24,6 +24,7 @@ final readonly class AddUserCommand implements CommandInterface
     }
 
     /**
+     * @param string[] $args
      * @throws JsonException
      */
     public function execute(array $args): void
@@ -36,9 +37,13 @@ final readonly class AddUserCommand implements CommandInterface
             throw new InvalidArgumentException('Usage: addUser <name> <lastName> <email(optional)>');
         }
 
-        $savedUser = $this->userRepository->saveUser(new User(null, $name, $lastName, $this->locale::create('ru_RU'), $email));
+        if ($email === null) {
+            $email = $this->locale::create('ru_RU')->email();
+        }
 
-        fwrite(STDOUT, "User added: iD={$savedUser->getID()}");
+        $savedUser = $this->userRepository->saveUser(new User(null, $name, $lastName, $email));
+
+        fwrite(STDOUT, "User added: ID={$savedUser->getID()}");
     }
 
 }

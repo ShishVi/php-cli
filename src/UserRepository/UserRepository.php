@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\UserRepository;
 
 use App\User\User;
+use InvalidArgumentException;
 use JsonException;
 use RuntimeException;
 use UnderflowException;
@@ -37,43 +38,45 @@ readonly class UserRepository
 
     public function getNextID(): int
     {
-        $allUsers = $this-> getArrAllUser();
-        if (empty($allUsers)) {
+        $rows = $this-> getArrAllUser();
+        if (empty($rows)) {
             return 1;
         }
-        $maxId = 0;
-        foreach ($allUsers as $user) {
-            if (isset($user['id']) && (int) $user['id'] > $maxId) {
-                $maxId = (int) $user['id'];
-            }
+        $users = [];
+        foreach ($rows as $row) {
+            $user = User::fromArray($row);
+            $users[$user->getID()] = $user;
         }
 
-        return $maxId + 1;
+
+        return max(array_keys($users)) + 1;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function getArrAllUser(): array
     {
-        if (!file_exists($this->fileDB) || filesize($this->fileDB) === 0) {
+        if (!is_file($this->fileDB)) {
             return [];
         }
 
         $content = file_get_contents($this->fileDB);
 
         if ($content === false) {
-            return [];
+            throw new RuntimeException("Cannot read {$this->fileDB}");
         }
 
         try {
-            $data = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
-
-            return $data ?? [];
+            return json_decode($content, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            echo 'Error read file: ' . $e->getMessage();
-
-            return [];
+            throw new RuntimeException("Cannot parse {$this->fileDB}: {$e->getMessage()}");
         }
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     public function allUsers(): array
     {
         return $this->getArrAllUser();
@@ -87,9 +90,10 @@ readonly class UserRepository
             throw new UnderflowException('No entries');
         }
         $userIdDelete = null;
+
         foreach ($loadAllUsers as $key => $user) {
             if (isset($user['id']) && $user['id'] === $id) {
-                $userIdDelete = $key;
+                $userIdDelete = $user['id'];
                 unset($loadAllUsers[$key]);
             }
         }
@@ -107,12 +111,6 @@ readonly class UserRepository
             fwrite(STDERR, 'User ' . $id . ' not found!');
             exit(2);
         }
-
-
-
-
-
-
     }
 
 

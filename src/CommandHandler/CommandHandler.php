@@ -8,14 +8,17 @@ use InvalidArgumentException;
 
 final class CommandHandler
 {
+    /** @var array<string, CommandInterface> */
     private array $commands = [];
+
+    /** @param CommandInterface[] $commands */
     public function __construct(array $commands)
     {
         foreach ($commands as $command) {
             $this->commands[$command->name()] = $command;
         }
     }
-
+    /** @param string[] $argv */
     public function checkCommand(array $argv): void
     {
 

@@ -18,11 +18,14 @@ final readonly class GetAllUsersCommand implements CommandInterface
     {
         return 'getAllUsers';
     }
+    /**
+     * @param string[] $args
+     */
     public function execute(array $args): void
     {
         $users = $this->userRepository->allUsers();
         if ($users === []) {
-            throw new InvalidArgumentException('No users found!\n');
+            throw new InvalidArgumentException('No users found!');
         }
         $headers = array_keys($users[0]);
         fwrite(STDOUT, implode('|', $headers) . PHP_EOL);

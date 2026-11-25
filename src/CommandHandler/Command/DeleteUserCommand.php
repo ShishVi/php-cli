@@ -18,6 +18,9 @@ final readonly class DeleteUserCommand implements CommandInterface
     {
         return 'deleteUser';
     }
+    /**
+     * @param string[] $args
+     */
     public function execute(array $args): void
     {
         try {

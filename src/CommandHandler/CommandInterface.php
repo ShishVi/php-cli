@@ -8,6 +8,9 @@ interface CommandInterface
 {
     public function name(): string;
 
+    /**
+     * @param string[] $args
+     */
     public function execute(array $args): void;
 
 }

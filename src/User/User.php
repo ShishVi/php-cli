@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\User;
 
-use Faker\Generator;
+use LogicException;
 
 class User
 {
-    public function __construct(private ?int $id, private string $name, private string $lastName, private Generator $faker, private ?string $email = '')
+    public function __construct(private ?int $id, private readonly string $name, private readonly string $lastName, private readonly string $email = '')
     {
-        if (empty($email)) {
-            $this->email = $this->faker->email();
-        }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -27,12 +27,30 @@ class User
 
     public function getID(): int
     {
+        if ($this->id === null) {
+            throw new LogicException('У пользователя нет ID (ещё не сохранён)');
+        }
+
         return (int)$this->id;
     }
 
-     public function setID(int $id): void
+    public function setID(int $id): void
     {
         $this->id = $id;
+    }
+
+    /**
+     * @param array<string,mixed> $row
+     */
+
+    public static function fromArray(array $row): self
+    {
+        return new self(
+            (int)$row['id'],
+            (string)$row['name'],
+            (string)$row['last_name'],
+            (string)$row['email'],
+        );
     }
 
 }
