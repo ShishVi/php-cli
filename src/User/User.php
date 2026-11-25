@@ -1,42 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\User;
+
+use Faker\Generator;
 
 class User
 {
-    private int $id;
-    private string $name;
-    private string $lastName;
-    private string $email;
-
-    public function __construct(int $id, string $name, string $lastName, ?string $email='')
+    public function __construct(private ?int $id, private string $name, private string $lastName, private Generator $faker, private ?string $email = '')
     {
-        $this->id = $id;
-        $this->name = $name;
-        $this->lastName = $lastName;
-        if(empty($email)){
-            $this->email = User::generatedEmail();
+        if (empty($email)) {
+            $this->email = $this->faker->email();
         }
-
     }
 
-    public function getUser():array
+    public function toArray(): array
     {
         return [
-            'ID' => $this->id,
-            'NAME' => $this->name,
-            'LAST_NAME' => $this->lastName,
-            'EMAIL' => $this->email,
+            'id' => $this->id,
+            'name' => $this->name,
+            'last_name' => $this->lastName,
+            'email' => $this->email,
         ];
     }
 
-    private static function generatedEmail():string
+    public function getID(): int
     {
-        $domains = ['mail.ru', 'gmail.com', 'yandex.ru', 'outlook.com'];
-        $randUserEmail = bin2hex(random_bytes(6));
-
-        return $randUserEmail .'@'. $domains[array_rand($domains)];
+        return (int)$this->id;
     }
 
+     public function setID(int $id): void
+    {
+        $this->id = $id;
+    }
 
 }
