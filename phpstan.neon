@@ -1,0 +1,10 @@
+parameters:
+    level: 8
+    paths:
+        - src
+        - bin
+        - config
+    excludePaths:
+        - vendor/*
+        - var/*
+    treatPhpDocTypesAsCertain: false
