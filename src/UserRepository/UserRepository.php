@@ -82,12 +82,12 @@ readonly class UserRepository
         return $this->getArrAllUser();
     }
 
-    public function deleteUser(int $id): void
+    public function deleteUser(int $id): int
     {
         $loadAllUsers = $this->getArrAllUser();
 
         if (empty($loadAllUsers)) {
-            throw new UnderflowException('No entries');
+            throw new RuntimeException('No entries');
         }
         $userIdDelete = null;
 
@@ -97,21 +97,20 @@ readonly class UserRepository
                 unset($loadAllUsers[$key]);
             }
         }
-        if ($userIdDelete) {
+        if ($userIdDelete !== null) {
             try {
                 $loadAllUsers = array_values($loadAllUsers);
                 $payload = json_encode($loadAllUsers, JSON_THROW_ON_ERROR);
                 file_put_contents($this->fileDB, $payload, LOCK_EX);
-                fwrite(STDOUT, 'User ' . $id . ' delete successfully');
-                exit(1);
+                return (int)$userIdDelete;
             } catch (JsonException $e) {
-                echo 'Error save: ' . $e->getMessage();
+
+                throw new RuntimeException("Error delete User {$userIdDelete}: {$e->getMessage()}");
             }
         } else {
-            fwrite(STDERR, 'User ' . $id . ' not found!');
-            exit(2);
+
+            throw new RuntimeException("User  {$id} not found!");
+
         }
     }
-
-
 }

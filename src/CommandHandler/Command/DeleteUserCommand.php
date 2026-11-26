@@ -6,7 +6,7 @@ namespace App\CommandHandler\Command;
 
 use App\CommandHandler\CommandInterface;
 use App\UserRepository\UserRepository;
-use UnderflowException;
+use RuntimeException;
 
 final readonly class DeleteUserCommand implements CommandInterface
 {
@@ -25,8 +25,11 @@ final readonly class DeleteUserCommand implements CommandInterface
     {
         try {
             $id = (int)$args[0];
-            $this->userRepository->deleteUser($id);
-        } catch (UnderflowException $e) {
+            $userID = $this->userRepository->deleteUser($id);
+            if ($userID) {
+                fwrite(STDOUT, 'User ' . $id . ' delete successfully');
+            }
+        } catch (RuntimeException $e) {
             fwrite(STDERR, 'Errors: ' . $e->getMessage());
         }
     }
